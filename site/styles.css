@@ -1,0 +1,668 @@
+:root {
+  --bg: #0b2b7a;
+  --bg-deep: #071b4f;
+  --ink: #f6f3ea;
+  --muted: #c8d4ff;
+  --panel: rgba(15, 52, 140, 0.9);
+  --panel-strong: rgba(16, 59, 155, 0.96);
+  --stroke: rgba(255, 205, 39, 0.72);
+  --accent: #ffcd27;
+  --accent-deep: #f0b800;
+  --gold: #ffcd27;
+  --shadow: 0 28px 70px rgba(4, 14, 42, 0.42);
+  --headline-font: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  --body-font: Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--body-font);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(255, 205, 39, 0.18), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.14), transparent 20%),
+    linear-gradient(180deg, #1849b3 0%, var(--bg) 38%, var(--bg-deep) 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 92%);
+  pointer-events: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 18px;
+  border: 4px solid rgba(255, 205, 39, 0.88);
+  pointer-events: none;
+}
+
+.page-shell {
+  position: relative;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.hero-copy,
+.hero-poster,
+.panel,
+.manifesto-card,
+.consequence,
+.pillar {
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+}
+
+.hero-copy,
+.hero-poster {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.hero-copy {
+  padding: 34px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 22%),
+    linear-gradient(135deg, rgba(18, 76, 191, 0.98), rgba(8, 37, 104, 0.98));
+}
+
+.hero-copy::after {
+  content: "HOLD THE LINE";
+  position: absolute;
+  right: -28px;
+  bottom: 18px;
+  font-family: var(--headline-font);
+  font-size: clamp(2.8rem, 8vw, 5.8rem);
+  line-height: 0.82;
+  color: rgba(255, 205, 39, 0.12);
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+.hero-poster {
+  margin: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: linear-gradient(135deg, #1d57ca, #0a276d);
+}
+
+.hero-poster img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.hero-poster figcaption {
+  margin: 0;
+  padding: 18px 20px;
+  border-top: 4px solid var(--accent);
+  background: #1847b3;
+  color: #fff8e7;
+  font-family: var(--headline-font);
+  font-size: 1.55rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  margin: 0 0 14px;
+  font-family: var(--headline-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-size: 0.92rem;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--headline-font);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 11ch;
+  font-size: clamp(3.8rem, 10vw, 8rem);
+  line-height: 0.88;
+}
+
+h2 {
+  font-size: clamp(2.1rem, 5vw, 4rem);
+  line-height: 0.92;
+}
+
+h3 {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.lede,
+.intro,
+.panel-copy p,
+.section-heading p,
+.manifesto-card p,
+.consequence p,
+.pillar p,
+.site-footer p {
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.lede {
+  max-width: 34rem;
+  margin: 16px 0 14px;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  color: var(--muted);
+}
+
+.intro {
+  max-width: 40rem;
+  margin: 0 0 12px;
+}
+
+.emphasis {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--headline-font);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  transform: translateY(-2px);
+}
+
+.button-primary {
+  color: #08245f;
+  background: linear-gradient(180deg, #ffd74f 0%, var(--accent) 100%);
+  border: 1px solid rgba(255, 205, 39, 0.8);
+}
+
+.button-secondary {
+  color: #fff8ea;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 205, 39, 0.4);
+}
+
+.ticker {
+  display: flex;
+  gap: 28px;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 205, 39, 0.8);
+  background: rgba(6, 24, 69, 0.92);
+  color: #fff8de;
+  font-family: var(--headline-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow);
+}
+
+.ticker span {
+  animation: drift 16s linear infinite;
+}
+
+.ticker span::after {
+  content: " / ";
+  color: rgba(255, 205, 39, 0.6);
+  padding-left: 28px;
+}
+
+main {
+  display: grid;
+  gap: 24px;
+}
+
+.panel,
+.manifesto-card,
+.consequence,
+.pillar {
+  border-radius: 12px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 20px;
+  padding: 28px;
+}
+
+.panel-copy-tight {
+  max-width: 46rem;
+}
+
+.signature-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px;
+  border: 2px solid rgba(7, 35, 100, 0.24);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    linear-gradient(135deg, #ffd33d 0%, #ffbf00 100%);
+  color: #072364;
+}
+
+.signature-label,
+.signature-note,
+.signature-timer {
+  margin: 0;
+}
+
+.signature-label {
+  font-family: var(--headline-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(7, 35, 100, 0.76);
+}
+
+.signature-count {
+  margin: 12px 0 8px;
+  font-family: var(--headline-font);
+  font-size: clamp(3rem, 8vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: 0.04em;
+}
+
+.signature-count.bump {
+  animation: count-bump 320ms ease;
+}
+
+.signature-meter {
+  overflow: hidden;
+  width: 100%;
+  height: 12px;
+  margin: 14px 0 12px;
+  border-radius: 999px;
+  background: rgba(7, 35, 100, 0.15);
+}
+
+.signature-meter-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      #1847b3 0,
+      #1847b3 16px,
+      #0a276d 16px,
+      #0a276d 32px
+    );
+  transition: width 900ms linear;
+}
+
+.signature-timer {
+  font-size: 1.05rem;
+  color: rgba(7, 35, 100, 0.86);
+}
+
+.signature-note {
+  margin-top: 8px;
+  color: rgba(7, 35, 100, 0.74);
+}
+
+.signature-emphasis {
+  margin: 14px 0 0;
+  font-family: var(--headline-font);
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.section-heading {
+  max-width: 52rem;
+}
+
+.manifesto {
+  display: grid;
+  gap: 20px;
+}
+
+.manifesto-grid,
+.pillars,
+.consequences-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.manifesto-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.manifesto-card,
+.consequence,
+.pillar {
+  padding: 24px;
+}
+
+.manifesto-card-dark {
+  color: #fff7ea;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.05), transparent 30%),
+    linear-gradient(135deg, #081f58 0%, #041339 100%);
+}
+
+.manifesto-card-accent {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(255, 205, 39, 0.16), rgba(20, 70, 176, 0.95));
+}
+
+.pillars {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.pillar-number {
+  display: inline-flex;
+  margin-bottom: 16px;
+  color: var(--accent);
+  font-family: var(--headline-font);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+}
+
+.consequences {
+  display: grid;
+  gap: 20px;
+}
+
+.consequences-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.consequence {
+  background:
+    linear-gradient(180deg, rgba(26, 79, 198, 0.88), rgba(9, 34, 94, 0.96));
+}
+
+.position {
+  grid-template-columns: 1fr;
+  padding: 36px 28px;
+  background:
+    linear-gradient(145deg, rgba(255, 205, 39, 0.16), rgba(18, 67, 169, 0.94)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
+}
+
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-top: 24px;
+  padding: 0 4px;
+  color: #eff3ff;
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-110%);
+  }
+}
+
+@keyframes count-bump {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-3px) scale(1.03);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 980px) {
+  .hero,
+  .panel,
+  .manifesto-grid,
+  .pillars,
+  .consequences-grid,
+  .site-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer {
+    display: grid;
+  }
+
+  .hero-copy::after {
+    font-size: clamp(2.6rem, 16vw, 5rem);
+    right: -12px;
+  }
+
+  .hero {
+    gap: 18px;
+  }
+
+  .panel {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  body::after {
+    inset: 10px;
+    border-width: 3px;
+  }
+
+  .page-shell {
+    padding: 18px 14px 36px;
+  }
+
+  .hero,
+  main {
+    gap: 18px;
+  }
+
+  .hero-copy,
+  .hero-poster,
+  .panel,
+  .manifesto-card,
+  .consequence,
+  .pillar {
+    border-radius: 12px;
+  }
+
+  .hero-copy,
+  .panel,
+  .manifesto-card,
+  .consequence,
+  .pillar,
+  .signature-card {
+    padding: 22px;
+  }
+
+  .hero-copy::after {
+    display: none;
+  }
+
+  h1 {
+    max-width: none;
+    font-size: clamp(3rem, 14vw, 4.25rem);
+  }
+
+  h2 {
+    font-size: clamp(1.9rem, 10vw, 2.75rem);
+  }
+
+  h3 {
+    font-size: 1.28rem;
+  }
+
+  .eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+  }
+
+  .lede,
+  .intro,
+  .panel-copy p,
+  .section-heading p,
+  .manifesto-card p,
+  .consequence p,
+  .pillar p,
+  .site-footer p {
+    font-size: 1rem;
+  }
+
+  .hero-actions {
+    gap: 10px;
+  }
+
+  .ticker {
+    gap: 18px;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+  }
+
+  .button {
+    width: 100%;
+    min-height: 52px;
+  }
+
+  .hero-poster figcaption {
+    padding: 14px 16px;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .signature-card {
+    gap: 4px;
+  }
+
+  .signature-count {
+    font-size: clamp(2.8rem, 15vw, 4rem);
+  }
+
+  .signature-emphasis {
+    font-size: 1rem;
+  }
+
+  .site-footer {
+    text-align: center;
+    justify-items: center;
+  }
+}
+
+@media (max-width: 420px) {
+  body::after {
+    inset: 6px;
+    border-width: 2px;
+  }
+
+  .page-shell {
+    padding: 14px 10px 28px;
+  }
+
+  .hero,
+  main,
+  .manifesto,
+  .consequences,
+  .manifesto-grid,
+  .pillars,
+  .consequences-grid {
+    gap: 14px;
+  }
+
+  .hero-copy,
+  .panel,
+  .manifesto-card,
+  .consequence,
+  .pillar,
+  .signature-card {
+    padding: 18px;
+  }
+
+  .ticker {
+    padding: 10px 12px;
+    font-size: 0.74rem;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 13vw, 3.4rem);
+  }
+
+  h2 {
+    font-size: clamp(1.7rem, 9vw, 2.2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
