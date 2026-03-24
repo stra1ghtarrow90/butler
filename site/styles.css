@@ -301,9 +301,7 @@ main {
   color: #072364;
 }
 
-.signature-label,
-.signature-note,
-.signature-timer {
+.signature-label {
   margin: 0;
 }
 
@@ -324,41 +322,6 @@ main {
 
 .signature-count.bump {
   animation: count-bump 320ms ease;
-}
-
-.signature-meter {
-  overflow: hidden;
-  width: 100%;
-  height: 12px;
-  margin: 14px 0 12px;
-  border-radius: 999px;
-  background: rgba(7, 35, 100, 0.15);
-}
-
-.signature-meter-fill {
-  display: block;
-  height: 100%;
-  width: 0;
-  border-radius: inherit;
-  background:
-    repeating-linear-gradient(
-      135deg,
-      #1847b3 0,
-      #1847b3 16px,
-      #0a276d 16px,
-      #0a276d 32px
-    );
-  transition: width 900ms linear;
-}
-
-.signature-timer {
-  font-size: 1.05rem;
-  color: rgba(7, 35, 100, 0.86);
-}
-
-.signature-note {
-  margin-top: 8px;
-  color: rgba(7, 35, 100, 0.74);
 }
 
 .signature-emphasis {

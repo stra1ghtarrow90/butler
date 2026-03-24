@@ -1,13 +1,11 @@
-const SIGNATURE_INTERVAL_MS = 45_000;
+const SIGNATURE_INTERVAL_MS = 1_000;
 const INITIAL_SIGNATURE_COUNT = 27_348;
 const STORAGE_KEYS = {
-  startTime: "keepbutler.signatureStartTime",
-  baseCount: "keepbutler.signatureBaseCount",
+  startTime: "keepbutler.signatureStartTime.v2",
+  baseCount: "keepbutler.signatureBaseCount.v2",
 };
 
 const countNode = document.getElementById("signature-count");
-const timerNode = document.getElementById("signature-timer");
-const meterNode = document.getElementById("signature-meter-fill");
 const formatter = new Intl.NumberFormat("en-GB");
 
 let previousCount = null;
@@ -49,26 +47,11 @@ function getCurrentCount(now) {
   return counterState.baseCount + Math.floor(getElapsed(now) / SIGNATURE_INTERVAL_MS);
 }
 
-function getMillisecondsToNext(now) {
-  const elapsed = getElapsed(now);
-  const remainder = elapsed % SIGNATURE_INTERVAL_MS;
-  return remainder === 0 ? SIGNATURE_INTERVAL_MS : SIGNATURE_INTERVAL_MS - remainder;
-}
-
-function formatCountdown(ms) {
-  const seconds = Math.ceil(ms / 1000);
-  return `${seconds}s`;
-}
-
 function updateCounter() {
   const now = Date.now();
   const count = getCurrentCount(now);
-  const msToNext = getMillisecondsToNext(now);
-  const progress = ((SIGNATURE_INTERVAL_MS - msToNext) / SIGNATURE_INTERVAL_MS) * 100;
 
   countNode.textContent = formatter.format(count);
-  timerNode.textContent = `Next name lands in ${formatCountdown(msToNext)}`;
-  meterNode.style.width = `${Math.max(0, Math.min(100, progress))}%`;
 
   if (previousCount !== null && count > previousCount) {
     countNode.classList.remove("bump");
