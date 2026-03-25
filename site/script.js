@@ -6,6 +6,8 @@ const STORAGE_KEYS = {
 };
 
 const countNode = document.getElementById("signature-count");
+const petitionForm = document.getElementById("petition-form");
+const petitionThanks = document.getElementById("petition-thanks");
 const formatter = new Intl.NumberFormat("en-GB");
 
 let previousCount = null;
@@ -64,3 +66,11 @@ function updateCounter() {
 
 updateCounter();
 window.setInterval(updateCounter, 1000);
+
+if (petitionForm && petitionThanks) {
+  petitionForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    petitionForm.hidden = true;
+    petitionThanks.hidden = false;
+  });
+}

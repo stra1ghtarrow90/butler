@@ -52,17 +52,41 @@
       <main>
         <section class="petition panel" id="petition">
           <div class="panel-copy">
-            <p class="eyebrow">The Numbers</p>
-            <h2>The movement is growing, one signature at a time.</h2>
+            <p class="eyebrow">The Petition</p>
+            <h2>Add your name to the standards wall.</h2>
             <p>
-              The count starts at <strong>27,348</strong> and keeps ticking upward every
-              second. Slow, stubborn, and impossible to ignore - much like the
-              campaign itself.
+              Leave a name and a comment, hit sign, and we'll thank you for backing the
+              cause. The counter keeps marching upward regardless.
             </p>
-            <p>
-              This is not about ego. It is about drawing a line and keeping it there.
-              The A team isn't about ego - it's about earning it, week in, week out.
-            </p>
+            <form class="petition-form" id="petition-form">
+              <label class="form-field" for="signature-name">
+                <span>Name</span>
+                <input
+                  class="form-input"
+                  id="signature-name"
+                  name="name"
+                  type="text"
+                  maxlength="80"
+                  placeholder="Name"
+                  required
+                />
+              </label>
+              <label class="form-field" for="signature-comment">
+                <span>Comment</span>
+                <textarea
+                  class="form-input form-textarea"
+                  id="signature-comment"
+                  name="comment"
+                  maxlength="280"
+                  placeholder="Why must Butler stay in the B team?"
+                  required
+                ></textarea>
+              </label>
+              <button class="button button-primary petition-submit" type="submit">
+                Sign
+              </button>
+            </form>
+            <p class="petition-thanks" id="petition-thanks" hidden>Thanks for your signature.</p>
           </div>
 
           <aside class="signature-card" aria-labelledby="signature-title">

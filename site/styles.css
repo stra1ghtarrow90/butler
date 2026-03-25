@@ -288,6 +288,65 @@ main {
   max-width: 46rem;
 }
 
+.petition-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.form-field span {
+  font-family: var(--headline-font);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 205, 39, 0.52);
+  border-radius: 10px;
+  background: rgba(4, 22, 65, 0.46);
+  color: #fff8ea;
+  font: inherit;
+}
+
+.form-input::placeholder {
+  color: rgba(239, 243, 255, 0.62);
+}
+
+.form-input:focus {
+  outline: 2px solid rgba(255, 205, 39, 0.75);
+  outline-offset: 2px;
+}
+
+.form-textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.petition-submit {
+  width: fit-content;
+}
+
+.petition-thanks {
+  margin: 20px 0 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 205, 39, 0.7);
+  border-radius: 10px;
+  background: rgba(255, 205, 39, 0.12);
+  font-family: var(--headline-font);
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .signature-card {
   display: flex;
   flex-direction: column;
@@ -526,6 +585,7 @@ main {
   .lede,
   .intro,
   .panel-copy p,
+  .petition-thanks,
   .section-heading p,
   .manifesto-card p,
   .consequence p,
@@ -548,6 +608,10 @@ main {
   .button {
     width: 100%;
     min-height: 52px;
+  }
+
+  .petition-submit {
+    width: 100%;
   }
 
   .hero-poster figcaption {
@@ -601,6 +665,10 @@ main {
   .pillar,
   .signature-card {
     padding: 18px;
+  }
+
+  .form-input {
+    padding: 12px 14px;
   }
 
   .ticker {
