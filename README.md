@@ -2,6 +2,10 @@
 
 Static campaign site for "Keep Butler in the B Team", served with nginx through Docker Compose.
 
+## Azure DevSecOps lab
+
+See the [implementation plan](docs/azure-devsecops-implementation-plan.md) for the phased Azure DevOps, Terraform, Container Apps, security gating and teardown workflow.
+
 ## Run locally
 
 ```bash
