@@ -1,8 +1,10 @@
 # Azure DevSecOps lab implementation plan
 
-Status: planned; no Azure resources deployed. Created 8 September 2026.
+Status: subscription and Owner access verified; minimal Terraform bootstrap implemented and planned, not applied. Created 8 September 2026; updated 14 September 2026. See [lab evidence](lab-evidence.md) for checks and outstanding work.
 
 This is our working checklist for deploying this repository through Azure DevOps to Azure Container Apps, enforcing security gates, and removing the lab afterwards. We will complete one phase at a time and record evidence before moving on. Creating this plan does not provision infrastructure or configure external accounts.
+
+Configuration policy: Terraform will manage Azure resources and supported Azure DevOps configuration from this point forward. Git remains responsible for application/pipeline source, and pipeline jobs build images and execute scanners. Interactive sign-in, approvals, billing agreements and any unsupported account-level operations remain separate prerequisites; do not hide them in Terraform `local-exec` scripts.
 
 ## 1. Outcome and starting point
 
@@ -25,6 +27,7 @@ These are planning defaults, to confirm during setup rather than prerequisites f
 | Decision | Proposed choice | When to settle it |
 | --- | --- | --- |
 | Azure account | Dedicated learning subscription, created through the Azure portal | Phase 0 |
+| Configuration management | Terraform for Azure infrastructure and Azure DevOps projects, repositories, pipelines, service connections and security policies | Confirmed 14 September |
 | Region | UK South, subject to Container Apps availability and subscription quota | Phase 0 |
 | Repository | Import into a private Azure Repos repository; preserve the existing remote | Phase 0 |
 | Branch | Protect `main`; use feature branches and PRs | Phase 0 |
@@ -70,18 +73,24 @@ Separate shared infrastructure from application deployments to avoid the registr
 
 | Root | Owns | State and lifecycle |
 | --- | --- | --- |
-| `infra/bootstrap` | State storage, resource groups, ACR Basic, shared Container Apps environment, logging, identities, role assignments and budget | Protected local state with a secure backup; operator-run, created first and destroyed last |
+| `infra/bootstrap` | State resource group, state storage/containers, operator backend access, required resource-provider registrations and subscription budget | Protected local state with a secure backup; operator-run, created first and destroyed last |
+| `infra/platform` | Shared/candidate/release resource groups, ACR Basic, shared Container Apps environment, logging, managed identities and scoped Azure role assignments | Dedicated remote state; created after bootstrap and destroyed after apps and DevOps connections |
+| `infra/devops` | Project, repositories, build definitions, environments, service connections, federated credentials on platform identities, pipeline permissions, branch policies and checks | Dedicated remote state; operator-managed so application pipelines cannot weaken their own gates |
 | `infra/environments/candidate` | Candidate Container App | Dedicated Azure Blob state container/key |
 | `infra/environments/release` | Release Container App | Separate Azure Blob state container/key |
 | `infra/modules/container-app` | Reusable application definition | No independent state |
 
-Bootstrap creates four resource groups: state, shared infrastructure, candidate and release. It creates empty app resource groups so the ordinary deployment identities can remain scoped below the subscription. No resource is managed by two Terraform states.
+Bootstrap creates the state resource group; platform creates shared infrastructure and empty candidate/release resource groups so ordinary deployment identities can remain scoped below the subscription. No resource is managed by two Terraform states. Pass only the required non-secret IDs between roots; ordinary application jobs should not read bootstrap or DevOps state.
 
 Keep bootstrap state outside its own backend for the initial lab. Protect it on the local machine and back it up securely; never commit or publish it as an ordinary build artifact. Losing it would complicate cleanup. Application state uses Entra authentication and Blob locking, with separate access scopes for each environment. [Azure backend documentation](https://developer.hashicorp.com/terraform/language/backend/azurerm).
 
-Bootstrap also establishes managed identities for registry pulls. Use ACR's conventional registry RBAC mode for the initial lab, disable the admin account and assign the runtime identity pull-only access. [Managed identity image pulls](https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull).
+Platform establishes managed identities for registry pulls. Use ACR's conventional registry RBAC mode for the initial lab, disable the admin account and assign the runtime identity pull-only access. [Managed identity image pulls](https://learn.microsoft.com/en-us/azure/container-apps/managed-identity-image-pull).
 
-Azure DevOps projects, service connections, branch policies and approvals will initially be configured through documented setup steps. They are not implicitly removed by the Azure Terraform roots. Automating those objects with the Azure DevOps provider is a later extension.
+Use `hashicorp/azurerm` for Azure resources and `microsoft/azuredevops` for supported DevOps configuration; add other providers only when a concrete requirement needs them. The DevOps root will also use AzureRM to create federated credentials from the service connections' exported issuer and subject. Azure subscription permissions and Azure DevOps organization permissions are separate and both need verification. [Azure DevOps provider](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs), [federated service connections](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/serviceendpoint_azurerm).
+
+An Azure DevOps organization must already exist: Microsoft currently requires organization creation through its web portal. Terraform can then manage the project and supported objects inside it. Initial sign-in and any agent grant/billing acceptance also remain account prerequisites. Verify authentication support in the pinned provider: prefer supported Azure CLI/Entra authentication; if a short-lived bootstrap PAT is needed, supply it locally through the environment, never Git or chat. [Organization creation limitation](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/create-organization?view=azure-devops), [provider authentication](https://github.com/microsoft/terraform-provider-azuredevops/blob/main/website/docs/index.html.markdown).
+
+Create/import the repository and seed pipeline YAML through Git before enabling build definitions and mandatory validation policies. Use explicit configuration stages and normal applies to avoid locking out the initial source push. Import pre-existing DevOps objects into the appropriate Terraform state rather than recreating them. Do not enable scheduled or automatic release execution until its checks and permissions are installed and verified.
 
 ## 5. Identity and trust boundaries
 
@@ -98,7 +107,7 @@ Use workload identity federation for pipeline authentication, avoiding long-live
 | Runtime pull identities | Pull images from this registry; no state or deployment access |
 | DAST job | HTTP access to the candidate hostname; no Azure identity |
 
-Finalize the exact shared-environment join/read and managed-identity assignment actions during bootstrap, and test them against the pinned provider. Keep role-assignment creation in bootstrap; ordinary Contributor permissions cannot create role assignments.
+Finalize the exact shared-environment join/read and managed-identity assignment actions during platform setup, and test them against the pinned provider. Keep role-assignment creation in the operator-managed bootstrap/platform roots; ordinary Contributor permissions cannot create role assignments.
 
 “Read-only plan” means read-only Azure infrastructure permissions. Backend locking can require Blob write/lease access, and reading state exposes its contents. PR Terraform can also execute code. Therefore authenticated PR plans need an explicit trust gate, not merely a less-privileged identity.
 
@@ -129,13 +138,14 @@ Publish readable summaries, redacted findings and an SBOM. Restrict Terraform bi
 
 We will:
 
+- [x] Create a dedicated Azure subscription manually; CLI subscription selection and Owner access verified 14 September 2026.
 - [ ] Record subscription ID, tenant ID, region, Azure DevOps organization/project/repository and naming prefix in a non-secret environment inventory.
 - [ ] Confirm account authority to create resources and role assignments; verify resource-provider registration, regional availability and quota.
 - [ ] Confirm whether Azure Repos is the source of truth and import the repository without overwriting existing remotes.
 - [ ] Check agent availability; a new Azure DevOps organization may need a free parallel-job grant or a billing decision.
 - [ ] Choose an independent reviewer or document solo-lab self-approval explicitly.
 - [ ] Estimate Container Apps, ACR, logs, storage, egress and pipeline costs using current regional pricing. Record assumptions and daily/monthly estimates before provisioning.
-- [ ] Create budget alerts when available; new subscriptions can take time to expose Cost Management features.
+- [ ] Define budget alerts in bootstrap Terraform and apply when available; new subscriptions can take time to expose Cost Management features.
 - [ ] Record a planned teardown date and resource tags: project, environment, owner and expiry.
 
 Your part: account creation/sign-in and decisions above. My part: preparation, commands, configuration and validation with you. Never paste passwords, tokens or state contents into the plan.
@@ -167,13 +177,14 @@ Exit evidence: repeatable local and pipeline scans plus a controlled failing run
 
 ### Phase 3 — Implement Terraform and bootstrap
 
-- [ ] Add bootstrap and app roots, shared module, provider constraints, dependency lock files, backend examples and variable validation.
+- [ ] Add bootstrap, platform, DevOps and app roots, shared module, provider constraints, dependency lock files, backend examples and variable validation.
 - [ ] Create budget, tagging and expiry configuration; constrain app CPU/memory/replica inputs to the agreed lab sizes.
 - [ ] Add shared Consumption environment, minimal logging, ACR Basic, state storage and scoped identities.
 - [ ] Keep state storage private to authenticated callers, disallow anonymous blobs, require TLS and use Entra data-plane authentication. Public network reachability is an explicit hosted-agent lab choice, not anonymous access.
 - [ ] Define app ingress, target port 8080, managed-identity pulls, probes and `min_replicas = 0` / `max_replicas = 1`.
 - [ ] Validate all roots and scan source and bootstrap plan. Review planned resources and cost before the first apply.
-- [ ] Apply bootstrap interactively, securely back up its state and configure federated service connections and scoped roles.
+- [ ] Apply the minimal bootstrap interactively and securely back up its state; initialize the other roots against separate remote backends.
+- [ ] Apply platform Terraform, then DevOps Terraform for project/repository setup, federated service connections, checks and pipeline permissions. Seed versioned source through Git and enable build definitions/policies in the documented order.
 - [ ] Verify image push/pull and state locking. Verify a second plan is clean after apply.
 - [ ] Prove candidate credentials cannot write release resources or release state.
 
@@ -181,7 +192,7 @@ Exit evidence: shared infrastructure exists, app plans resolve correctly, identi
 
 ### Phase 4 — Protect pull requests and review plans
 
-- [ ] Set `main` branch policies: required reviewers, successful validation, comment resolution and reset/revalidation when commits change.
+- [ ] Define and apply `main` branch policies through the DevOps root: required reviewers, successful validation, comment resolution and reset/revalidation when commits change.
 - [ ] Configure Azure Repos PR validation through branch policies; YAML `pr:` triggers are not the Azure Repos mechanism.
 - [ ] Add the protected authenticated plan workflow described in section 5, after credential-free checks and review of code being executed.
 - [ ] Generate separate candidate/release plans, scan their JSON and publish a concise change summary. Bootstrap changes receive a separate operator-reviewed plan.
@@ -250,16 +261,18 @@ Exit evidence: completed exercise matrix and a successful rollback drill. [Conta
 - [ ] Review separate release and candidate destroy plans, then apply those saved plans.
 - [ ] Verify both application states contain no managed resources and both apps are gone.
 - [ ] Export any evidence needed locally. Retain state access until application cleanup is complete.
-- [ ] Use the protected local bootstrap state to plan and destroy shared infrastructure last, including registry, logs, identities, role assignments, budget and backend storage.
+- [ ] After app destruction and evidence export, use operator credentials to destroy DevOps service connections/checks/federated credentials through the DevOps root. Explicitly decide whether to retain the project/repository; use a documented retained configuration rather than accidentally deleting learning material.
+- [ ] Destroy platform resources through their remote state, including registry, environment, logs, identities and scoped role assignments.
+- [ ] Use the protected local bootstrap state to destroy the state storage and remaining bootstrap resources last. Keep operator authentication available independently of the pipeline identities being deleted.
 - [ ] Check resource groups and all subscription resources, including hidden resource types; resolve partial deletes, locks and residual resources before declaring success.
 - [ ] Remove/disable Azure DevOps service connections and review paid parallel jobs, extensions and other separately purchased services. Keep or remove the learning repository/project intentionally.
 - [ ] Review Cost Management after its reporting delay; document any final charges rather than expecting an immediate zero display.
 - [ ] Either retain the empty subscription for the next exercise or cancel it through Azure and delete it when eligible. Check separately billed SaaS/support commitments and the final invoice.
 - [ ] Record teardown date, successful destroy run IDs and the empty-resource inventory.
 
-Terraform destroys resources represented by its configuration/state; it does not automatically discover everything in a subscription, cancel Azure billing, remove external Azure DevOps objects or erase past charges. Successful `destroy` output is only one part of the verification.
+Terraform destroys resources represented by its configuration/state; it does not automatically discover everything in a subscription, cancel Azure billing, remove unmanaged Azure DevOps objects or erase past charges. The DevOps root has its own explicit teardown. Successful `destroy` output is only one part of the verification.
 
-For a repeatability drill, destroy only the two apps, then recreate them through the normal pipeline using retained bootstrap resources. Those shared resources continue to incur possible charges until the final bootstrap teardown.
+For a repeatability drill, destroy only the two apps, then recreate them through the normal pipeline using retained platform/DevOps resources. Shared resources continue to incur possible charges until platform and bootstrap teardown.
 
 ## 8. Cost controls and failure handling
 
@@ -280,6 +293,8 @@ docs/
   lab-evidence.md                        # Redacted results and completion dates
 infra/
   bootstrap/
+  platform/
+  devops/
   modules/container-app/
   environments/candidate/
   environments/release/
@@ -315,7 +330,18 @@ Commit lock files and examples containing non-secret inputs. Keep actual state, 
 
 Use one small PR per phase or coherent part of a phase. Before cloud work, we review the actual plan, selected subscription and cost assumptions. After each phase, update this checklist and `lab-evidence.md` with what ran, what passed and what remains unresolved. Do not mark a cloud capability complete based only on YAML or Terraform validation.
 
-The next working session starts with Phase 0 decisions and Phase 1 container preparation. Container hardening and credential-free scripts can proceed while accounts and pipeline access are being arranged.
+The next working session starts with the immediate tasks below. Container hardening and credential-free scripts can proceed alongside infrastructure preparation; the first minimal state/bootstrap deployment does not require the application to be ready. The phase numbers above group work by topic rather than mandating that platform provisioning precede local security checks.
+
+### Immediate tasks after subscription creation
+
+1. Verify local Terraform/Docker versions. Azure CLI 2.90.0 was installed through Homebrew on 14 September and verified with `az version`; it is available at `/opt/homebrew/bin/az`. Homebrew also installed Python 3.14.7 and updated its default Python links. Terraform 1.13.4 initialized AzureRM 5.5.0 and validated/planned the bootstrap successfully. Docker daemon readiness still needs checking. Azure sign-in, active subscription and operator Owner access are verified.
+2. Sign in interactively, identify the intended subscription/tenant and verify resource/role-assignment permissions. Collect the DevOps organization URL, proposed project/repo names, region, budget amount, alert recipient and reviewer identity. Create the organization manually only if one does not exist.
+3. Implement `infra/bootstrap`: provider/version pinning, explicit subscription selection, state storage, required registrations, backend access, budget and tags. Add ignore rules, example inputs and recovery/teardown instructions. Validate and scan it, then review its actual plan before applying.
+4. Implement `infra/platform` and `infra/devops`, with separate remote states. Use Terraform for projects, repositories, identities, service connections, environments, build definitions, permissions and gate configuration; handle initial Git source population as version control.
+5. Complete container hardening and scanner/pipeline code. Apply the DevOps configuration in the documented order so policies become active after their referenced pipelines exist, with release execution held disabled until controls are verified.
+6. Run candidate deployment, DAST, promotion, negative gate exercises and the full teardown drill from the later phases.
+
+First milestone: a reviewed and applied minimal bootstrap, with securely backed-up local state and a working remote backend for subsequent roots. No container environment or registry is needed for this milestone.
 
 Final completion requires all of the following:
 

@@ -1,0 +1,12 @@
+.git
+.DS_Store
+infra
+docs
+reports
+**/.terraform
+**/*.tfstate*
+**/*.tfplan*
+**/*.tfvars*
+**/*.tfbackend
+.env
+.env.*
